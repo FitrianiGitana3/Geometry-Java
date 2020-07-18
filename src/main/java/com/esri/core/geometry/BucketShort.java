@@ -79,6 +79,28 @@ public void sort(AttributeStreamOfInt32 indices, int begin, int end,
             m_buckets.resize(0);
             m_bucketed_indices.resize(0);
         }
+        if (b_fallback) 
+                {
+                    sorter.userSort(begin, end, indices);
+                    return;
+                }
+
+                int j = 0;
+                for (int i = 0, n = m_buckets.size(); i < n; i++) 
+                {
+                    int j0 = j;
+                    j = m_buckets.get(i);
+                    if (j > j0)
+                        sorter.userSort(begin + j0, begin + j, indices);
+                }
+                assert (j == end);
+
+                if (getBucketCount() > 100) // some heuristics to preserve memory
+                {
+                    m_buckets.resize(0);
+                    m_bucketed_indices.resize(0);
+                }
+            }
 
 
 private boolean reset(int bucket_count, double min_value, double max_value,
