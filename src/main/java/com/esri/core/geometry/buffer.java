@@ -195,4 +195,44 @@ A	private static final class GlueingCursorForPolyline extends GeometryCursor {
                 return null;
             }
         }
+private Geometry buffer_() {
+        int gt = m_geometry.getType().value();
+        if (Geometry.isSegment(gt)) {// convert segment to a polyline and repeat
+                                        // the call
+            Polyline polyline = new Polyline(m_geometry.getDescription());
+            polyline.addSegment((Segment) (m_geometry), true);
+            m_geometry = polyline;
+            return buffer_();
+        }
+
+        if (m_distance <= m_tolerance) {
+            if (Geometry.isArea(gt)) {
+                if (m_distance <= 0) {
+                    Envelope2D env = new Envelope2D();
+                    m_geometry.queryEnvelope2D(env);
+                    if (env.getWidth() <= -m_distance * 2 || env.getHeight() <= m_distance * 2)
+                        return new Polygon(m_geometry.getDescription());
+                }
+            } else {
+                return new Polygon(m_geometry.getDescription());
+            }
+        }
+
+        // Complex cases:
+        switch (m_geometry.getType().value()) {
+        case Geometry.GeometryType.Point:
+            return bufferPoint_();
+        case Geometry.GeometryType.MultiPoint:
+            return bufferMultiPoint_();
+        case Geometry.GeometryType.Polyline:
+            return bufferPolyline_();
+        case Geometry.GeometryType.Polygon:
+            return bufferPolygon_();
+        case Geometry.GeometryType.Envelope:
+            return bufferEnvelope_();
+        default:
+            throw GeometryException.GeometryInternalError();
+        }
+    }
+
 
