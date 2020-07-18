@@ -40,4 +40,34 @@ class Clipper
         }
         return 0;
     }
+package com.esri.core.geometry;
+
+import com.esri.core.geometry.VertexDescription.Persistence;
+import java.nio.ByteBuffer;
+class Boundary {
+
+    static boolean hasNonEmptyBoundary(Geometry geom, ProgressTracker progress_tracker) {
+        if (geom.isEmpty())return false;
+
+        Geometry.Type gt = geom.getType();
+        if (gt == Geometry.Type.Polygon) {
+            if (geom.calculateArea2D() == 0) return false;
+
+            return true;
+        } else if (gt == Geometry.Type.Polyline) {
+            boolean[] b = new boolean[1];
+            b[0] = false;
+            calculatePolylineBoundary_(geom._getImpl(), progress_tracker, true,b);
+            return b[0];
+        } else if (gt == Geometry.Type.Envelope) {
+            return true;
+        } else if (Geometry.isSegment(gt.value())) {
+            if (!((Segment) geom).isClosed()) {
+                return true;
+            }return false;
+        } else if (Geometry.isPoint(gt.value())) {
+            return false;
+        }return false;
+    }
+
 
