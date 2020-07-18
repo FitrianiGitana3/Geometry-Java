@@ -86,6 +86,46 @@ Geometry buffer(Geometry geometry, double distance,
         return result_geom;     
     }
 
+public Geometry next() {
+            Point point = new Point();
+            while (true) {
+                if (m_index == m_mp.getPointCount()) return null;
+
+                m_mp.getPointByVal(m_index, point);
+                m_index++;
+                if (point.isEmpty()) continue;
+                break;
+            }
+
+            boolean b_first = false;
+            if (m_buffered_polygon == null) {
+                m_x = point.getX();
+                m_y = point.getY();
+
+
+            m_buffered_polygon = m_parent.buffer(point, m_distance, m_spatialReference, m_densify_dist, m_max_vertex_in_complete_circle, m_progress_tracker);
+            b_first = true;
+            }
+
+            Geometry res;
+            if (m_index < m_mp.getPointCount()) {
+                res = new Polygon();
+                m_buffered_polygon.copyTo(res);
+            } else {
+                res = m_buffered_polygon; // do not clone the last geometry.
+            }
+
+            if (!b_first){
+                Transformation2D transform = new Transformation2D();
+                double dx = point.getX() - m_x;
+                double dy = point.getY() - m_y;
+                transform.setShift(dx, dy);
+                res.applyTransformation(transform);
+            }
+
+            return res;
+        }
+
 
 
 
