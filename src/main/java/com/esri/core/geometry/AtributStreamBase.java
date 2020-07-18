@@ -234,4 +234,21 @@ public static AttributeStreamBase createByteStream(int size) {
         return newStream;
 
     }
+public static AttributeStreamBase createIndexStream(int size,
+            int defaultValue) {
+        int persistence = Persistence.enumInt32;// VertexDescription.getPersistenceFromInt(NumberUtils::SizeOf((int)0));
+        AttributeStreamBase newStream;
+        switch (persistence) {
+        case (Persistence.enumInt32):
+            newStream = new AttributeStreamOfInt32(size, (int) defaultValue);
+            break;
+        case (Persistence.enumInt64):
+            newStream = new AttributeStreamOfInt64(size, (long) defaultValue);
+            break;
+        default:
+            throw new GeometryException("Internal Error");
+        }
+        return newStream;
+    }
+
 
